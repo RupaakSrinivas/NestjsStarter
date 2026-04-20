@@ -5,16 +5,18 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { Account } from './database/models/accounts.model';
 import { Setting } from './database/models/settings.model';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 @Module({
   imports: [
     SequelizeModule.forRoot({
       dialect: 'postgres',
-      host: 'localhost',
+      host: process.env.DB_HOST,
       port: 5432,
-      username: 'postgres',
-      password: 'password',
-      database: 'nestjs_practice',
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME_DEVELOPMENT,
       models: [Account, Setting],
     }),
     AccountsModule,
