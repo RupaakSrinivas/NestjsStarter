@@ -22,7 +22,7 @@ export class SettingsController {
     @Body() createSettingDto: CreateSettingDto,
     @CurrentAccount() account: Account,
   ) {
-    return this.settingsService.create(createSettingDto, account);
+    return this.settingsService.create(createSettingDto, account.id);
   }
 
   @Get()
@@ -32,6 +32,6 @@ export class SettingsController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentAccount() account: Account) {
-    return this.settingsService.findOne(+id, account);
+    return this.settingsService.findOne(+id, account.id);
   }
 }

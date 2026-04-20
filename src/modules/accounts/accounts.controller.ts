@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
+import { BasicAuthGuard } from '../auth/basic-auth.gaurd';
+import { UseGuards } from '@nestjs/common';
+import { CurrentAccount } from '../auth/account.decorator';
+import { Account } from '../../database/models/accounts.model';
 
 @Controller('accounts')
 export class AccountsController {
@@ -12,17 +16,8 @@ export class AccountsController {
   }
 
   @Get()
-  findAll() {
-    return this.accountsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accountsService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accountsService.remove(+id);
+  @UseGuards(BasicAuthGuard)
+  findOne(@CurrentAccount() account: Account) {
+    return this.accountsService.findOne(account.id);
   }
 }

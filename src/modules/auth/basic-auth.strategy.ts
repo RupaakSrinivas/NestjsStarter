@@ -1,5 +1,9 @@
 import { BasicStrategy as Strategy } from 'passport-http';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectModel } from '@nestjs/sequelize';
 import { Account } from '../../database/models/accounts.model';
@@ -13,14 +17,21 @@ export class BasicAuthStrategy extends PassportStrategy(Strategy) {
     super();
   }
 
-  async validate(username: string, password: string): Promise<Account> {
+  async validate(
+    username: string,
+    password: string,
+  ): Promise<Omit<Account, 'password'>> {
     if (username && password) {
       const account = await this.accountModel.findOne({
         where: { name: username, deletedAt: null },
+        raw: true,
       });
 
       if (!account) {
-        throw new UnauthorizedException('Invalid credentials');
+        throw new NotFoundException('Account not found');
+      }
+      if (account.password !== password) {
+        throw new UnauthorizedException(`Invalid password`);
       }
 
       return account;

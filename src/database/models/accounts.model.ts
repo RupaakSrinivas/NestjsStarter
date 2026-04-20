@@ -21,6 +21,12 @@ export class Account extends Model {
   })
   name: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  password: string;
+
   @HasMany(() => Setting)
   settings: Setting[];
 }

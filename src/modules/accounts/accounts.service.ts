@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -23,28 +24,14 @@ export class AccountsService {
       throw new ConflictException('Account with this name already exists');
     }
 
-    return this.accountModel.create({ name: createAccountDto.name });
-  }
-
-  async findAll(): Promise<Account[]> {
-    return this.accountModel.findAll({ where: { deletedAt: null } });
+    return this.accountModel.create({
+      name: createAccountDto.name,
+      password: createAccountDto.password,
+    });
   }
 
   async findOne(id: number): Promise<Account> {
     const account = await this.accountModel.findByPk(id);
-    if (!account) {
-      throw new NotFoundException('Account not found');
-    }
-    return account;
-  }
-
-  async remove(id: number): Promise<Account> {
-    const account = await this.accountModel.findByPk(id);
-    if (!account) {
-      throw new NotFoundException('Account not found');
-    }
-    account.deletedAt = new Date();
-    await account.save();
-    return account;
+    return account!;
   }
 }
