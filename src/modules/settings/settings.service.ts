@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { InjectModel } from '@nestjs/sequelize';
-import { Setting } from 'src/database/models/settings.model';
+import { Setting } from '../../database/models/settings.model';
 import { DataType } from './dto/create-setting.dto';
 
 @Injectable()
