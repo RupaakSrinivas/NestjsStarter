@@ -7,15 +7,13 @@ import { Account } from '../../database/models/accounts.model';
 describe('AccountsService', () => {
   let service: AccountsService;
   let accountModel: {
-    findOne: jest.Mock;
-    create: jest.Mock;
+    findOrCreate: jest.Mock;
     findByPk: jest.Mock;
   };
 
   beforeEach(async () => {
     accountModel = {
-      findOne: jest.fn(),
-      create: jest.fn(),
+      findOrCreate: jest.fn(),
       findByPk: jest.fn(),
     };
 
@@ -40,27 +38,28 @@ describe('AccountsService', () => {
     const dto = { name: 'alice', password: 'password123' };
     const created = { id: 1, ...dto };
 
-    accountModel.findOne.mockResolvedValue(null);
-    accountModel.create.mockResolvedValue(created);
+    accountModel.findOrCreate.mockResolvedValue([created, true]);
 
     const result = await service.create(dto);
 
-    expect(accountModel.findOne).toHaveBeenCalledWith({
-      where: { name: 'alice', deletedAt: null },
-    });
-    expect(accountModel.create).toHaveBeenCalledWith({
-      name: 'alice',
-      password: 'password123',
+    expect(accountModel.findOrCreate).toHaveBeenCalledWith({
+      where: { name: 'alice' },
+      defaults: {
+        password: 'password123',
+      },
     });
     expect(result).toEqual(created);
   });
 
   it('throws ConflictException when account name already exists', async () => {
     const dto = { name: 'alice', password: 'password123' };
-    accountModel.findOne.mockResolvedValue({ id: 7, name: 'alice' });
+    accountModel.findOrCreate.mockResolvedValue([
+      { id: 7, name: 'alice' },
+      false,
+    ]);
 
     await expect(service.create(dto)).rejects.toBeInstanceOf(ConflictException);
-    expect(accountModel.create).not.toHaveBeenCalled();
+    expect(accountModel.findOrCreate).toHaveBeenCalledTimes(1);
   });
 
   it('findOne returns account by primary key', async () => {

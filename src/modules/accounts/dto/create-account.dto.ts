@@ -4,10 +4,10 @@ export class CreateAccountDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  name: string;
+  declare name: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
-  password: string;
+  declare password: string;
 }

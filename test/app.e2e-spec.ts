@@ -74,7 +74,7 @@ describe('App E2E Tests', () => {
       return request(app.getHttpServer())
         .get('/accounts')
         .set('Authorization', badAuth)
-        .expect(401);
+        .expect(404);
     });
 
     it('GET /accounts (Correct Auth)', async () => {

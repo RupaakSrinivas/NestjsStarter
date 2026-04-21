@@ -6,6 +6,14 @@ import { Setting } from './settings.model';
   timestamps: true,
   paranoid: true,
   underscored: false,
+  defaultScope: {
+    attributes: { exclude: ['password'] },
+  },
+  scopes: {
+    withPassword: {
+      attributes: { include: ['password'] },
+    },
+  },
 })
 export class Account extends Model {
   @Column({
@@ -19,14 +27,14 @@ export class Account extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  name: string;
+  declare name: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  password: string;
+  declare password: string;
 
   @HasMany(() => Setting)
-  settings: Setting[];
+  declare settings: Setting[];
 }

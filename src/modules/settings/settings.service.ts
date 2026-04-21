@@ -2,12 +2,14 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Setting } from '../../database/models/settings.model';
 import { DataType } from './dto/create-setting.dto';
-
+import { UniqueConstraintError } from 'sequelize';
+import { log } from 'console';
 @Injectable()
 export class SettingsService {
   constructor(
@@ -24,12 +26,21 @@ export class SettingsService {
       createSettingDto.data_type,
     );
 
-    return this.settingModel.create({
-      name: createSettingDto.name,
-      data_type: createSettingDto.data_type,
-      account_id: account_id,
-      value: valueAsString,
-    });
+    try {
+      return await this.settingModel.create({
+        name: createSettingDto.name,
+        data_type: createSettingDto.data_type,
+        account_id: account_id,
+        value: valueAsString,
+      });
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        throw new ConflictException(
+          'Setting name already exists for this account',
+        );
+      }
+      throw error;
+    }
   }
 
   async findAll(accountId: number): Promise<Setting[]> {
@@ -46,6 +57,38 @@ export class SettingsService {
     }
 
     return setting;
+  }
+
+  async update(
+    id: number,
+    updateSettingDto: CreateSettingDto,
+    accountId: number,
+  ) {
+    const setting = await this.settingModel.findByPk(id);
+    if (!setting || setting.account_id !== accountId)
+      throw new NotFoundException(`Setting not found: ${id}`);
+
+    const nextValue = this.convertValueToString(
+      updateSettingDto.value,
+      updateSettingDto.data_type,
+    );
+
+    try {
+      await setting.update({
+        name: updateSettingDto.name,
+        data_type: updateSettingDto.data_type,
+        value: nextValue,
+      });
+
+      return setting;
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        throw new ConflictException(
+          'Setting name already exists for this account',
+        );
+      }
+      throw new BadRequestException(`Failed to update setting`);
+    }
   }
 
   private convertValueToString(value: any, dataType: DataType): string {

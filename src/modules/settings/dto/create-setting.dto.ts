@@ -53,12 +53,12 @@ function IsValidValue(validationOptions?: ValidationOptions) {
 export class CreateSettingDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  declare name: string;
 
   @IsEnum(DataType)
-  data_type: DataType;
+  declare data_type: DataType;
 
   @IsNotEmpty()
   @IsValidValue()
-  value: any;
+  declare value: any;
 }

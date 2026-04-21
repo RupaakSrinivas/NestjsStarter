@@ -25,28 +25,30 @@ export class Setting extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    unique: 'settings_account_name_unique',
   })
-  name: string;
+  declare name: string;
 
   @Column({
     type: DataType.ENUM('string', 'number', 'boolean', 'json'),
     allowNull: false,
   })
-  data_type: 'string' | 'number' | 'boolean' | 'json';
+  declare data_type: 'string' | 'number' | 'boolean' | 'json';
 
   @ForeignKey(() => Account)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    unique: 'settings_account_name_unique',
   })
-  account_id: number;
+  declare account_id: number;
 
   @BelongsTo(() => Account)
-  account: Account;
+  declare account: Account;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  value: string;
+  declare value: string;
 }

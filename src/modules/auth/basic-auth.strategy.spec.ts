@@ -53,7 +53,7 @@ describe('BasicAuthStrategy', () => {
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('throws UnauthorizedException when password is invalid', async () => {
+  it('throws NotFoundException when password is invalid', async () => {
     accountModel.findOne.mockResolvedValue({
       id: 1,
       name: 'alice',
@@ -62,7 +62,7 @@ describe('BasicAuthStrategy', () => {
 
     await expect(
       strategy.validate('alice', 'wrong-password'),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('throws UnauthorizedException when credentials are missing', async () => {

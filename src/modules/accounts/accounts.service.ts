@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { Account } from '../../database/models/accounts.model';
@@ -16,22 +11,27 @@ export class AccountsService {
   ) {}
 
   async create(createAccountDto: CreateAccountDto): Promise<Account> {
-    const existingAccount = await this.accountModel.findOne({
-      where: { name: createAccountDto.name, deletedAt: null },
+    const [account, isNew] = await this.accountModel.findOrCreate({
+      where: { name: createAccountDto.name },
+      defaults: {
+        password: createAccountDto.password,
+      },
     });
 
-    if (existingAccount) {
-      throw new ConflictException('Account with this name already exists');
+    if (!isNew) {
+      throw new ConflictException('Account with the same name');
     }
 
-    return this.accountModel.create({
-      name: createAccountDto.name,
-      password: createAccountDto.password,
-    });
+    const { password, ...accountWithoutPassword } = account.toJSON();
+    return accountWithoutPassword as Account;
   }
 
   async findOne(id: number): Promise<Account> {
     const account = await this.accountModel.findByPk(id);
-    return account!;
+
+    if (!account) {
+      throw new ConflictException('Account not found');
+    }
+    return account;
   }
 }

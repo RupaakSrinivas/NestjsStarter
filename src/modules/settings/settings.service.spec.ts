@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/sequelize';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { Setting } from '../../database/models/settings.model';
 import { DataType } from './dto/create-setting.dto';
+import { UniqueConstraintError } from 'sequelize';
 
 describe('SettingsService', () => {
   let service: SettingsService;
@@ -102,6 +107,17 @@ describe('SettingsService', () => {
 
     expect(settingModel.create).toHaveBeenCalledWith(
       expect.objectContaining({ value: '{"mode":"safe"}' }),
+    );
+  });
+
+  it('create throws ConflictException for duplicate setting name per account', async () => {
+    const dto = { name: 'theme', data_type: DataType.STRING, value: 'dark' };
+    settingModel.create.mockRejectedValue(
+      new UniqueConstraintError({ errors: [] as any }),
+    );
+
+    await expect(service.create(dto, 10)).rejects.toBeInstanceOf(
+      ConflictException,
     );
   });
 

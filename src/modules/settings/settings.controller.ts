@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Put } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { BasicAuthGuard } from '../auth/basic-auth.gaurd';
@@ -33,5 +27,14 @@ export class SettingsController {
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentAccount() account: Account) {
     return this.settingsService.findOne(+id, account.id);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateSettingDto: CreateSettingDto,
+    @CurrentAccount() account: Account,
+  ) {
+    return this.settingsService.update(+id, updateSettingDto, account.id);
   }
 }
