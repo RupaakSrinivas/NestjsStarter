@@ -45,7 +45,7 @@ export class BasicAuthStrategy extends PassportStrategy(Strategy) {
       if (account && match) {
         return account;
       } else {
-        throw new NotFoundException('Account not found');
+        throw new UnauthorizedException('Invalid credentials');
       }
     }
 
